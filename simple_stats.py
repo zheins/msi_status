@@ -3,41 +3,59 @@ import os
 import csv
 
 CANCER_TYPES = ['Colorectal Cancer', 'Anal Cancer']
-
+POLE_HOT_SPOTS = ['P286R','P286H','P286S','V411L']
 def tumorBreakdown(ccrType,sample_data,pt2sample):
-	cancer_breakdown_output = ['\t'.join(['PATIENT_ID','SAMPLE_ID','NO_MUTAIONS','RATIO (INDELS/TOTAL_EVENTS)','NO_POLE_MUTATIONS','MSI_STATUS','GENE_PANEL'])]
+	cancer_breakdown_output = ['\t'.join(['PATIENT_ID','SAMPLE_ID','NO_MUTAIONS','RATIO (INDELS/TOTAL_EVENTS)','NO_POLE_MUTATIONS','POLE_ANNOTATIONS','NO_POLE_HOTSPOTS','MSI_STATUS','GENE_PANEL','OTHER_PRO_ANNOTATIONS'])]
 	cancer_breakdown_data = []
 
+	#for each patient,sampleList grab variant data for input cancer type
 	for ptid,sampleList in pt2sample.items():
+
 		for sid in sampleList:
 			data =  [data for sample,data in sample_data.iteritems() if sample == sid]
+
 			for d in data:
 				if d.get('CANCER_TYPE') == ccrType:
 					varData = d.get('VARIANT',[])
-					varCount = 0
+					totalEvents = 0
 					indelCount = 0
 					poleCount = 0
+					poleHotSpots = 0
+					poleAnnotations = []
+					protAnnotations = []
 					
+					#grab variant data and annotation information
 					for vd in varData:
+						totalEvents += 1
 						if vd.get('Variant_Type') == 'INS' or vd.get('Variant_Type') == 'DEL':
 							indelCount += 1
-						varCount += 1
+						
 						if vd.get('Hugo_Symbol') == 'POLE':
 							poleCount += 1
+							poleAnnot = vd.get('Amino_Acid_Change').replace('p.','')
+							poleAnnotations.append(poleAnnot)
+							if poleAnnot in POLE_HOT_SPOTS:
+								poleHotSpots += 1
+						else:
+							aaChange = vd.get('Amino_Acid_Change').replace('p.','')
+							protAnnot = vd.get('Hugo_Symbol')+':'+aaChange
+							protAnnotations.append(protAnnot)
 
-					msiStatus = d.get('MSI_STATUS','Unknown')
+					msiStatus = d.get('MSI_STATUS','')
 					genePanel = d.get('GENE_PANEL')
+					poleAnnotations = '; '.join(poleAnnotations)
+					protAnnotations = '; '.join(sorted(protAnnotations))
 
 
-					if varCount == 0:
+					if totalEvents == 0:
 						ratio = 0.00
 
 					else:
-						ratio = round(1.0*indelCount/varCount,2)
+						ratio = round(1.0*indelCount/totalEvents,2)
 
 
-					line = [ptid,sid,str(len(varData)),str(ratio),str(poleCount),msiStatus,genePanel]
-
+					line = [ptid,sid,str(len(varData)),str(ratio),str(poleCount),poleAnnotations,str(poleHotSpots),msiStatus,genePanel,protAnnotations]
+					
 					cancer_breakdown_data.append('\t'.join(line))
 
 	cancer_breakdown_output.extend(list(set(cancer_breakdown_data)))
@@ -86,6 +104,7 @@ def main():
 		if sid in sample_data:
 			variant['Variant_Type'] = line['Variant_Type']
 			variant['Hugo_Symbol'] = line['Hugo_Symbol']
+			variant['Amino_Acid_Change'] = line['Amino_Acid_Change']
 			if sample_data[sid].get('VARIANT', '')  == '':
 				sample_data[sid]['VARIANT'] = [variant]
 			else:
@@ -99,10 +118,10 @@ def main():
 		fh.write(cancer_breakdown_output)
 		fh.close()				
 
-	print len(sample_data)
-	for sample, data in sample_data.iteritems():
-		print sample
-		print data
+	# print len(sample_data)
+	# for sample, data in sample_data.iteritems():
+	# 	print sample
+	# 	print data
 
 if __name__ == '__main__':
 	main()
