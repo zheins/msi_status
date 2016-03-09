@@ -2,7 +2,7 @@ import sys
 import os
 import csv
 
-CANCER_TYPES = ['Colorectal Cancer', 'Anal Cancer']
+CANCER_TYPES = ['Colorectal Cancer', 'Anal Cancer','Endometrial Cancer']
 POLE_HOT_SPOTS = ['P286R','P286H','P286S','V411L']
 def tumorBreakdown(ccrType,sample_data,pt2sample):
 	cancer_breakdown_output = ['\t'.join(['PATIENT_ID','SAMPLE_ID','NO_MUTAIONS','RATIO (INDELS/TOTAL_EVENTS)','NO_POLE_MUTATIONS','POLE_ANNOTATIONS','NO_POLE_HOTSPOTS','MSI_STATUS','GENE_PANEL','OTHER_PRO_ANNOTATIONS'])]
@@ -10,7 +10,6 @@ def tumorBreakdown(ccrType,sample_data,pt2sample):
 
 	#for each patient,sampleList grab variant data for input cancer type
 	for ptid,sampleList in pt2sample.items():
-
 		for sid in sampleList:
 			data =  [data for sample,data in sample_data.iteritems() if sample == sid]
 
@@ -58,7 +57,7 @@ def tumorBreakdown(ccrType,sample_data,pt2sample):
 					
 					cancer_breakdown_data.append('\t'.join(line))
 
-	cancer_breakdown_output.extend(list(set(cancer_breakdown_data)))
+	cancer_breakdown_output.extend(sorted(list(set(cancer_breakdown_data))))
 	return '\n'.join(cancer_breakdown_output)
 
 def main():
@@ -113,7 +112,7 @@ def main():
 	for ccrType in CANCER_TYPES:
 		cancer_breakdown_output = tumorBreakdown(ccrType,sample_data,pt2sample)
 
-		fname = 'cancer_breakdown_'+ccrType+'.txt'
+		fname = 'cancer_breakdown_'+ccrType.replace(' ','_')+'.txt'
 		fh = open(fname,'w')
 		fh.write(cancer_breakdown_output)
 		fh.close()				
