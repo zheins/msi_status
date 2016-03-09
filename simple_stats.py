@@ -5,7 +5,7 @@ import csv
 CANCER_TYPES = ['Colorectal Cancer', 'Anal Cancer','Endometrial Cancer']
 POLE_HOT_SPOTS = ['P286R','P286H','P286S','V411L']
 def tumorBreakdown(ccrType,sample_data,pt2sample):
-	cancer_breakdown_output = ['\t'.join(['PATIENT_ID','SAMPLE_ID','NO_MUTAIONS','RATIO (INDELS/TOTAL_EVENTS)','NO_POLE_MUTATIONS','POLE_ANNOTATIONS','NO_POLE_HOTSPOTS','MSI_STATUS','GENE_PANEL','OTHER_PRO_ANNOTATIONS'])]
+	cancer_breakdown_output = ['\t'.join(['PATIENT_ID','SAMPLE_ID','CANCER_TYPE_DETAILED','NO_MUTAIONS','RATIO (INDELS/TOTAL_EVENTS)','NO_POLE_MUTATIONS','POLE_ANNOTATIONS','NO_POLE_HOTSPOTS','MSI_STATUS','GENE_PANEL','OTHER_PRO_ANNOTATIONS'])]
 	cancer_breakdown_data = []
 
 	#for each patient,sampleList grab variant data for input cancer type
@@ -53,7 +53,7 @@ def tumorBreakdown(ccrType,sample_data,pt2sample):
 						ratio = round(1.0*indelCount/totalEvents,2)
 
 
-					line = [ptid,sid,str(len(varData)),str(ratio),str(poleCount),poleAnnotations,str(poleHotSpots),msiStatus,genePanel,protAnnotations]
+					line = [ptid,sid,d.get('CANCER_TYPE_DETAILED'),str(len(varData)),str(ratio),str(poleCount),poleAnnotations,str(poleHotSpots),msiStatus,genePanel,protAnnotations]
 					
 					cancer_breakdown_data.append('\t'.join(line))
 
