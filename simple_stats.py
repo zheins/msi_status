@@ -138,10 +138,10 @@ def main():
 		if line['CANCER_TYPE'] in CANCER_TYPES:
 			sample_data[line['SAMPLE_ID']] = {'CANCER_TYPE':line['CANCER_TYPE'], 'CANCER_TYPE_DETAILED':line['CANCER_TYPE_DETAILED'], 'GENE_PANEL':line['GENE_PANEL']}
 			ptid = line['PATIENT_ID']
-			sid_list = pt2sample.get(ptid,[])
-			sid_list.append(line['SAMPLE_ID'])
+			sid_list = pt2sample.get(ptid,set())
+			sid_list.add(line['SAMPLE_ID'])
             
-			pt2sample[ptid] = list(set(sid_list))
+			pt2sample[ptid] = sid_list
 
 	# process supplemental clin file
 	clin_detailed_reader = csv.DictReader(clin_detailed_file, dialect = 'excel-tab')
