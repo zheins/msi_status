@@ -46,7 +46,7 @@ def process_maf_file(maf_file):
 
         aa_change = line['HGVSp_Short']
         if len(aa_change.strip()) > 0 and aa_change != 'p.=':
-            m = re.search('p.([A-Z*]{1,2})([0-9]*)(\S*)', aa_change)
+            m = re.search('p.([A-Z*]*)([0-9]*)(\S*)', aa_change)
             ref = m.group(1)
             loc = m.group(2)
             alt = m.group(3)
@@ -54,6 +54,14 @@ def process_maf_file(maf_file):
             variant['ref'] = ref
             variant['loc'] = loc
             variant['alt'] = alt
+       
+        print aa_change
+        print variant.get('loc',999)
+        print variant.get('Hugo_Symbol')
+        print variant.get('SAMPLE_ID')
+        print line['Start_Position']
+        if int(variant.get('loc',999)) < 350 and variant_type != 'inframe' and variant_type != 'frameshift':
+            continue
 
         if patient_data[pid].get('VARIANTS', '')  == '':
             patient_data[pid]['VARIANTS'] = [variant]
