@@ -22,6 +22,8 @@ def merge_studies(fname_study1, fname_study2):
 			for key in DETAILED_HEADERS:
 				if key in INT_TYPE_HEADERS:
 					data_to_merge[key] = int(line1[key])
+				elif key in LIST_TYPE_HEADERS:
+					data_to_merge[key] = line1[key].split(' ')
 				else:
 					data_to_merge[key] = line1[key]
 			merged_lines[line1['Site']] = data_to_merge
@@ -41,7 +43,9 @@ def merge_studies(fname_study1, fname_study2):
 				if key in INT_TYPE_HEADERS:
 					data_to_merge[key] = str(data_to_merge.get(key) + int(line2[key]))
 				elif key in LIST_TYPE_HEADERS:
-					data_to_merge[key] = ' '.join([data_to_merge.get(key),line2[key]])
+					new_list = data_to_merge.get(key)
+					new_list.extend(line2[key].split(' '))
+					data_to_merge[key] = ' '.join(list(set(new_list)))
 				elif key in TUMOR_LIST_HEADERS:
 					data_to_merge[key] = '; '.join([data_to_merge.get(key),line2[key]])
 			merged_lines[line2['Site']] = data_to_merge
