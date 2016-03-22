@@ -6,7 +6,7 @@ import time
 import datetime
 
 VARIANT_CLASSIFICATIONS = ['Nonsense_Mutation', 'Missense_Mutation', 'In_Frame_Ins', 'In_Frame_Del', 'frameshift_deletion', 'Frame_Shift_Ins', 'Frame_Shift_Del']
-DETAILED_HEADERS = ['Hugo', 'Amino_Acid', 'Site', 'Total_Events', 'Total_Insertions', 'Total_Deletions', 'Total_Truncating_Events', 'Missense_Count', 'Nonsense_Count', 'Inframe_Count', 'Frameshift_Count', 'Inframe_INS_Count', 'Inframe_DEL_Count', 'Frameshift_INS_Count', 'Frameshift_DEL_Count', 'Truncating_Frameshift_INS_Count', 'Truncating_Frameshift_DEL_Count', 'Truncating_Frameshift_Count', 'Tumor_Type_List', 'Tumor_Type_Count', 'Primary_Tumor_list', 'Primary_Tumor_Count', 'Metastatic_Tumor_List', 'Metastatic_Tumor_Count']
+DETAILED_HEADERS = ['Hugo', 'Amino_Acid', 'Site', 'Total_Events', 'Total_Insertions', 'Total_Deletions', 'Total_Truncating_Events', 'Missense_Count', 'Nonsense_Count', 'Inframe_Count', 'Frameshift_Count', 'Inframe_INS_Count', 'Inframe_DEL_Count', 'Frameshift_INS_Count', 'Frameshift_DEL_Count', 'Truncating_Frameshift_INS_Count', 'Truncating_Frameshift_DEL_Count', 'Truncating_Frameshift_Count', 'Tumor_Type_List', 'Tumor_Type_Count', 'Primary_Tumor_list', 'Primary_Tumor_Count', 'Metastatic_Tumor_List', 'Metastatic_Tumor_Count', 'OQL_All', 'OQL_Primary', 'OQL_Metastatic', 'Cohort_All', 'Cohort_Primary', 'Cohort_Metastatic']
 GENES = ['TP53']
 ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d-%H%M')
 
@@ -216,27 +216,55 @@ def process_aa_data(filter_type, filter):
         metastatic_tumor_count = 0
         tumor_type_count = 0
 
+        #oql lists
+        oql_base = 'MUT = ' + aa[1] + str(aa[2])
+        oql_all  = set()
+        oql_primary = set()
+        oql_metastatic = set()
+
+        #cohort lists
+        cohort_all = []
+        cohort_primary = []
+        cohort_metastatic = []
+
         for data_set in [if_ins_data,if_del_data,fs_ins_data,fs_del_data,missense_data,nonsense_data]:
             primary_count = 0
             met_count = 0
             for vd in data_set:
                 tumor_type_list[vd.get('Cancer_Type')] = tumor_type_list.get(vd.get('Cancer_Type'),0) + 1
+                oql_all.add(oql_base+vd.get('AA_Change'))
+                cohort_all.append(vd.get('SAMPLE_ID'))
 
                 if vd.get('Sample_Type') == 'Primary':
                     primary_tumor_list[vd.get('Cancer_Type')] = primary_tumor_list.get(vd.get('Cancer_Type'),0) + 1
                     primary_count += 1
+                    oql_primary.add(oql_base+vd.get('AA_Change'))
+                    cohort_primary.append(vd.get('SAMPLE_ID'))
 
                 if vd.get('Sample_Type') == 'Metastasis':
                     metastatic_tumor_list[vd.get('Cancer_Type')] = metastatic_tumor_list.get(vd.get('Cancer_Type'),0) + 1
                     met_count += 1
-            
+                    oql_metastatic.add(oql_base+vd.get('AA_Change'))
+                    cohort_metastatic.append(vd.get('SAMPLE_ID'))
+
             primary_tumor_count += primary_count 
             metastatic_tumor_count += met_count 
             tumor_type_count += primary_count + met_count
 
+        #format tumor type lists
         tumor_type_list = '; '.join(format_tumor_counts(tumor_type_list))
         primary_tumor_list = '; '.join(format_tumor_counts(primary_tumor_list))
         metastatic_tumor_list = '; '.join(format_tumor_counts(metastatic_tumor_list))
+
+        #format oql queries
+        oql_all = ' '.join(list(oql_all))
+        oql_primary = ' '.join(list(oql_primary))
+        oql_metastatic = ' '.join(list(oql_metastatic))
+
+        #format cohort lists
+        cohort_all = ' '.join(cohort_all)
+        cohort_primary = ' '.join(cohort_primary)
+        cohort_metastatic = ' '.join(cohort_metastatic)
 
         #format data for output files
         gene_aa_site = '\t'.join([aa[0],aa[1],str(aa[2])])
@@ -247,9 +275,11 @@ def process_aa_data(filter_type, filter):
         tumor_types = '\t'.join([tumor_type_list,str(tumor_type_count)])
         primary_tumors = '\t'.join([primary_tumor_list,str(primary_tumor_count)])
         metastatic_tumors = '\t'.join([metastatic_tumor_list,str(metastatic_tumor_count)])
+        oql_queries = '\t'.join([oql_all,oql_primary,oql_metastatic])
+        cohort_queries = '\t'.join([cohort_all,cohort_primary,cohort_metastatic])
 
         #put formatted data into detailed outputs
-        det_output_data += '\t'.join([gene_aa_site,totals,in_frame_det_counts,frameshift_det_counts,trunc_fs_counts,tumor_types,primary_tumors,metastatic_tumors])  
+        det_output_data += '\t'.join([gene_aa_site,totals,in_frame_det_counts,frameshift_det_counts,trunc_fs_counts,tumor_types,primary_tumors,metastatic_tumors,oql_queries,cohort_queries])  
         detailed_output.append(det_output_data) 
 
     return detailed_output
