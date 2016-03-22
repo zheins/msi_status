@@ -318,9 +318,12 @@ def main():
 
     #generate detailed summaries by cancer types
     print 'Data by cancer types written to dir:',ts+'-CancerBreakdown/'
+    num_files = 0
     for cancer_type in cancer_type_list:
         detailed_output = process_aa_data('cancer', cancer_type)
-
+        if len(detailed_output) == 1:
+            continue
+        num_files += 1
         cancer_name = cancer_type.replace(' ','_')
         fname_cancer_detailed = ts+'-CancerBreakdown/'+cancer_name+'-Detailed_Summary.txt'
         
@@ -331,7 +334,7 @@ def main():
         fh = open(fname_cancer_detailed,'w')
         fh.write('\n'.join(detailed_output))
         fh.close()
-    print 'Succesfully generated files for ',str(len(cancer_type_list)), 'cancer types.'
+    print 'Succesfully generated files for ',str(num_files)+'/'+str(len(cancer_type_list)), 'cancer types.'
     print
 
     #generate detailed summaries by Primary/Metastasis sample types
