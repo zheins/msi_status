@@ -6,7 +6,7 @@ import time
 import datetime
 
 VARIANT_CLASSIFICATIONS = ['Nonsense_Mutation', 'Missense_Mutation', 'In_Frame_Ins', 'In_Frame_Del', 'frameshift_deletion', 'Frame_Shift_Ins', 'Frame_Shift_Del']
-DETAILED_HEADERS = ['Hugo', 'Amino_Acid', 'Site', 'Total_Events', 'Total_Insertions', 'Total_Deletions', 'Total_Truncating_Events', 'Missense_Count', 'Nonsense_Count', 'Inframe_Count', 'Frameshift_Count', 'Inframe_INS_Count', 'Inframe_DEL_Count', 'Frameshift_INS_Count', 'Frameshift_DEL_Count', 'Truncating_Frameshift_INS_Count', 'Truncating_Frameshift_DEL_Count', 'Truncating_Frameshift_Count', 'Tumor_Type_Count', 'Tumor_Type_List', 'Primary_Tumor_Count', 'Primary_Tumor_list', 'Metastatic_Tumor_Count', 'Metastatic_Tumor_List']
+DETAILED_HEADERS = ['Hugo', 'Amino_Acid', 'Site', 'Total_Events', 'Total_Insertions', 'Total_Deletions', 'Total_Truncating_Events', 'Missense_Count', 'Nonsense_Count', 'Inframe_Count', 'Frameshift_Count', 'Inframe_INS_Count', 'Inframe_DEL_Count', 'Frameshift_INS_Count', 'Frameshift_DEL_Count', 'Truncating_Frameshift_INS_Count', 'Truncating_Frameshift_DEL_Count', 'Truncating_Frameshift_Count', 'Tumor_Type_List', 'Tumor_Type_Count', 'Primary_Tumor_list', 'Primary_Tumor_Count', 'Metastatic_Tumor_List', 'Metastatic_Tumor_Count']
 GENES = ['TP53']
 ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d-%H%M')
 
